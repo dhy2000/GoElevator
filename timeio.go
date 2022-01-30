@@ -48,11 +48,11 @@ func handleInput(in <-chan string) {
 			AddElevatorCount()
 			switch addElevatorRequest.elevatorType {
 			case "A":
-				goWithWait(func() { Elevator(addElevatorRequest.id, ElevatorParamA, FloorAvailableA) })
+				StartElevator(addElevatorRequest.id, ElevatorParamA, FloorAvailableA)
 			case "B":
-				goWithWait(func() { Elevator(addElevatorRequest.id, ElevatorParamB, FloorAvailableB) })
+				StartElevator(addElevatorRequest.id, ElevatorParamB, FloorAvailableB)
 			case "C":
-				goWithWait(func() { Elevator(addElevatorRequest.id, ElevatorParamC, FloorAvailableC) })
+				StartElevator(addElevatorRequest.id, ElevatorParamC, FloorAvailableC)
 			}
 			continue
 		}

@@ -25,10 +25,7 @@ const (
 	TERMINATE = false
 )
 
-var (
-	elevatorSignals = make(chan bool, 1000)
-	finishSignals   = make(chan bool, 1000)
-)
+var finishSignals = make(chan bool, 1000)
 
 // ProcessRequest Deal with transition and put into wait list
 func ProcessRequest(request *PassengerRequest) *LinkedRequest {
@@ -47,9 +44,7 @@ func PutRequest(request *LinkedRequest) {
 	lock.Lock()
 	defer lock.Unlock()
 	waitList[request.request.from].PushBack(request)
-	for i := 0; i < elevatorCount; i++ {
-		elevatorSignals <- SIGNAL
-	}
+	NotifyAllElevator(SIGNAL)
 }
 
 // FetchOneRequest trying to fetch one request at floor, if there is no request available at this floor, return nil
@@ -74,11 +69,11 @@ func FetchOneRequest(floor int, floorAvailable func(int) bool, direction int) *L
 func HasRequest(floor int, floorAvailable func(int) bool, direction int) bool {
 	lock.RLock()
 	defer lock.RUnlock()
-	for pos := floor; pos >= MinFloor && pos <= MaxFloor; pos += direction {
+	for pos := floor + direction; pos >= MinFloor && pos <= MaxFloor; pos += direction {
 		q := &waitList[pos]
 		for e := q.Front(); e != nil; e = e.Next() {
 			if request, ok := e.Value.(*LinkedRequest); ok {
-				if floorAvailable(request.request.to) && DirectionSame(request.request, direction) {
+				if floorAvailable(request.request.to) {
 					return true
 				}
 			}
@@ -101,7 +96,5 @@ func Terminate() {
 		<-finishSignals
 		comingCount--
 	}
-	for range elevators {
-		elevatorSignals <- TERMINATE // send terminator to each elevator
-	}
+	NotifyAllElevator(TERMINATE)
 }

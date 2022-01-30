@@ -20,8 +20,8 @@ func main() {
 		InteractiveInput()
 		waitGroup.Done()
 	}()
-	goWithWait(func() { Elevator(1, ElevatorParamA, FloorAvailableA) })
-	// goWithWait(func() { Elevator(2, ElevatorParamB, FloorAvailableB) })
-	// goWithWait(func() { Elevator(3, ElevatorParamC, FloorAvailableC) })
+	StartElevator(1, ElevatorParamA, FloorAvailableA)
+	// StartElevator(2, ElevatorParamB, FloorAvailableB)
+	// StartElevator(3, ElevatorParamC, FloorAvailableC)
 	waitGroup.Wait()
 }

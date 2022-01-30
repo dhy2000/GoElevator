@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,10 @@ type ElevatorParam struct {
 	moveDelay      int
 	passengerLimit int
 }
+
+var elevatorLock = sync.Mutex{}
+
+var elevatorSignals = make([]chan bool, 0)
 
 // enum direction
 const (
@@ -68,7 +73,7 @@ func DirectionSame(request *PassengerRequest, direction int) bool {
 	return false
 }
 
-func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool) {
+func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool, signalChan <-chan bool) {
 	pos := 1
 	direction := UP
 	open := false
@@ -142,15 +147,30 @@ func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool) {
 				time.Sleep(time.Duration(param.moveDelay) * time.Millisecond)
 				TimedPrintln(fmt.Sprintf("ARRIVE-%v-%v", pos, id))
 			}
+			continue
 		}
 		// Suspend: turn and turn back
 		if turn() {
-			signal := <-elevatorSignals
+			signal := <-signalChan
 			if !signal {
 				return // this elevator should terminate
 			}
-		} else {
-			continue
 		}
+	}
+}
+
+func StartElevator(id int, param *ElevatorParam, floorAvailable func(int) bool) {
+	signal := make(chan bool, 1000)
+	elevatorLock.Lock()
+	defer elevatorLock.Unlock()
+	elevatorSignals = append(elevatorSignals, signal)
+	goWithWait(func() { Elevator(id, param, floorAvailable, signal) })
+}
+
+func NotifyAllElevator(signal bool) {
+	elevatorLock.Lock()
+	defer elevatorLock.Unlock()
+	for _, signalChan := range elevatorSignals {
+		signalChan <- signal
 	}
 }
