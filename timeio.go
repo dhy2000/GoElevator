@@ -24,8 +24,8 @@ func TimedPrintln(s string) {
 // handleInput is a goroutine
 func handleInput(in <-chan string) {
 	for {
-		s, ok := <-in
-		if !ok {
+		s := <-in
+		if s == "END" {
 			break
 		}
 		// try parse PassengerRequest and AddElevatorRequest
@@ -73,5 +73,5 @@ func InteractiveInput() {
 		}
 		ch <- s
 	}
-	close(ch)
+	ch <- "END"
 }

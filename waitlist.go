@@ -90,8 +90,6 @@ func AddElevatorCount() {
 
 // Terminate this is a goroutine
 func Terminate() {
-	lock.Lock()
-	defer lock.Unlock()
 	for comingCount > 0 {
 		<-finishSignals
 		comingCount--
