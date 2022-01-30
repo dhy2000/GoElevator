@@ -21,7 +21,7 @@ func main() {
 		waitGroup.Done()
 	}()
 	StartElevator(1, ElevatorParamA, FloorAvailableA)
-	// StartElevator(2, ElevatorParamB, FloorAvailableB)
-	// StartElevator(3, ElevatorParamC, FloorAvailableC)
+	StartElevator(2, ElevatorParamB, FloorAvailableB)
+	StartElevator(3, ElevatorParamC, FloorAvailableC)
 	waitGroup.Wait()
 }
