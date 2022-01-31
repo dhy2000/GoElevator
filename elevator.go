@@ -59,7 +59,7 @@ var (
 
 var (
 	FloorAvailableA = func(n int) bool { return n >= MinFloor && n <= MaxFloor }
-	FloorAvailableB = func(n int) bool { return n >= MinFloor && n <= MaxFloor && n%2 == 0 }
+	FloorAvailableB = func(n int) bool { return n >= MinFloor && n <= MaxFloor && n%2 != 0 }
 	FloorAvailableC = func(n int) bool { return (n >= 1 && n <= 3) || (n >= 18 && n <= 20) }
 )
 
