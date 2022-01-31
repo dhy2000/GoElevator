@@ -96,7 +96,7 @@ func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool, signa
 		}
 		open = o
 	}
-
+	turned := false
 	// one step
 	for {
 		if floorAvailable(pos) {
@@ -138,7 +138,14 @@ func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool, signa
 			return passenger.Len() == 0 && !HasRequest(pos, floorAvailable, direction)
 		}
 		// Turn: elevator is empty, no same-direction requests
-		if turn() {
+		if flag := turn(); flag {
+			if turned { // just turned at last cycle
+				signal := <-signalChan
+				if signal == TERMINATE {
+					return
+				}
+			}
+			turned = flag
 			direction = -direction
 		} else {
 			// Move
@@ -147,14 +154,7 @@ func Elevator(id int, param *ElevatorParam, floorAvailable func(int) bool, signa
 				time.Sleep(time.Duration(param.moveDelay) * time.Millisecond)
 				TimedPrintln(fmt.Sprintf("ARRIVE-%v-%v", pos, id))
 			}
-			continue
-		}
-		// Suspend: turn and turn back
-		if turn() {
-			signal := <-signalChan
-			if !signal {
-				return // this elevator should terminate
-			}
+			turned = false
 		}
 	}
 }
