@@ -7,8 +7,8 @@ import (
 var waitGroup = &sync.WaitGroup{}
 
 func goWithWait(f func()) {
+	waitGroup.Add(1)
 	go func() {
-		waitGroup.Add(1)
 		f()
 		waitGroup.Done()
 	}()
